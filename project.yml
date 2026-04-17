@@ -1,0 +1,90 @@
+name: HydroLite
+options:
+  bundleIdPrefix: com.hydrolite
+  deploymentTarget:
+    iOS: "16.0"
+  createIntermediateGroups: true
+  generateEmptyDirectories: true
+
+settings:
+  base:
+    SWIFT_VERSION: "5.9"
+    DEVELOPMENT_TEAM: "NH2XFPC9KN"
+    CODE_SIGN_STYLE: Automatic
+
+targets:
+  HydroLite:
+    type: application
+    platform: iOS
+    deploymentTarget: "16.0"
+    sources:
+      - path: HydroLite
+        excludes:
+          - "**/.DS_Store"
+    resources:
+      - HydroLite/Resources/Assets.xcassets
+      - HydroLite/Resources/PrivacyInfo.xcprivacy
+      - HydroLite/Resources/Configuration.storekit
+    info:
+      path: HydroLite/Resources/Info.plist
+      properties:
+        CFBundleDisplayName: HydroLite
+        CFBundleShortVersionString: "1.0.0"
+        CFBundleVersion: "1"
+        LSRequiresIPhoneOS: true
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        UISupportedInterfaceOrientations~ipad:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        ITSAppUsesNonExemptEncryption: false
+        NSHealthShareUsageDescription: HydroLite can read your water intake from the Health app. This is optional; the app works without it.
+        NSHealthUpdateUsageDescription: HydroLite can save logged drinks to the Health app as water entries. This is optional.
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.hydrolite.app
+        TARGETED_DEVICE_FAMILY: "1,2"
+        SUPPORTS_MACCATALYST: NO
+        SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD: YES
+        CURRENT_PROJECT_VERSION: "1"
+        MARKETING_VERSION: "1.0.0"
+        GENERATE_INFOPLIST_FILE: NO
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        ENABLE_PREVIEWS: YES
+        SWIFT_EMIT_LOC_STRINGS: YES
+
+  HydroLiteTests:
+    type: bundle.unit-test
+    platform: iOS
+    deploymentTarget: "16.0"
+    sources:
+      - path: HydroLiteTests
+    dependencies:
+      - target: HydroLite
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.hydrolite.app.tests
+        GENERATE_INFOPLIST_FILE: YES
+
+schemes:
+  HydroLite:
+    build:
+      targets:
+        HydroLite: all
+        HydroLiteTests: [test]
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - HydroLiteTests
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+    archive:
+      config: Release

@@ -1,0 +1,24 @@
+{
+  "identifier" : "HydroLiteStoreKit",
+  "nonRenewingSubscriptions" : [],
+  "products" : [
+    {
+      "displayPrice" : "6.99",
+      "familyShareable" : false,
+      "internalID" : "hydrolite.lifetime",
+      "localizations" : [
+        {
+          "description" : "One-time purchase. Unlock custom presets, electrolyte tracking, full history, and advanced reminders.",
+          "displayName" : "HydroLite Lifetime Unlock",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.hydrolite.app.lifetime",
+      "referenceName" : "Lifetime Unlock",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : { "_applicationInternalID" : "HydroLite", "_failTransactionsEnabled" : false, "_locale" : "en_US", "_storefront" : "USA" },
+  "subscriptionGroups" : [],
+  "version" : { "major" : 3, "minor" : 0 }
+}
