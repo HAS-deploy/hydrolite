@@ -16,14 +16,14 @@ Requires:
 import os, sys, json, time, urllib.request, urllib.parse, mimetypes, io, pathlib
 import jwt
 
-APP_ID = os.environ.get("APP_ID", "6762468976")
+APP_ID = os.environ.get("APP_ID", "6762470335")
 KEY_ID = os.environ["ASC_KEY_ID"]
 ISSUER = os.environ["ASC_ISSUER_ID"]
 KEY_PATH = os.environ.get("ASC_KEY_PATH", f"{os.path.expanduser('~')}/.appstoreconnect/private_keys/AuthKey_{KEY_ID}.p8")
 BASE = "https://api.appstoreconnect.apple.com"
 
-BUNDLE_ID = os.environ.get("BUNDLE_ID", "com.walkcue.app")
-LIFETIME_PRODUCT_ID = os.environ.get("PRODUCT_ID", "com.walkcue.app.lifetime")
+BUNDLE_ID = os.environ.get("BUNDLE_ID", "com.hydrolite.app")
+LIFETIME_PRODUCT_ID = os.environ.get("PRODUCT_ID", "com.hydrolite.app.lifetime")
 
 
 def token():
@@ -70,7 +70,7 @@ def ensure_iap_localization(iap_id):
                 "type": "inAppPurchaseLocalizations",
                 "attributes": {
                     "locale": "en-US",
-                    "name": "WalkCue Lifetime Unlock",
+                    "name": "HydroLite Lifetime Unlock",
                     "description": "One-time unlock. All routines & reminders.",
                 },
                 "relationships": {
@@ -123,7 +123,7 @@ def cmd_iap_screenshot(path="docs/screenshots/paywall.png"):
     upload_iap_review_screenshot(iap_id, path)
 
 
-def ensure_iap_price(iap_id, customer_price="8.99", territory="USA"):
+def ensure_iap_price(iap_id, customer_price="6.99", territory="USA"):
     # Price point lookup uses v2 path for v2-created IAPs; schema here is fiddly
     # across Apple API versions so we fetch via the v2 per-product price points.
     try:
@@ -294,31 +294,30 @@ def cmd_metadata():
 
     attrs = {
         "description": (
-            "WalkCue is the walking timer for people who just want to walk — without the fuss.\n\n"
-            "Tap start, get a guided walk with simple interval cues, and build a consistent daily habit. "
-            "Pick a routine, set a goal, and go.\n\n"
+            "HydroLite is the simplest way to track your water.\n\n"
+            "Open the app. Tap a preset. That's it. No accounts, no nagging, no bloat.\n\n"
             "Features\n"
-            "• Quick Start — one tap, guided walk with warm up, brisk, and cool down\n"
-            "• Interval cues — haptic and audio cues at each transition\n"
-            "• Preset routines — beginner, brisk intervals, treadmill, recovery\n"
-            "• Daily goal tracking — minutes walked, sessions completed\n"
-            "• Walk history — see your consistency over time\n"
-            "• Walk reminders — simple, reliable local notifications\n"
-            "• Optional Apple Health step count\n"
-            "• Works offline, large readable UI, one-handed use\n\n"
+            "• One-tap water logging — 8, 12, 16, 20 oz or 250/500/750 mL/1 L\n"
+            "• Calm daily progress ring with instant visual feedback\n"
+            "• Undo your last log with a single tap\n"
+            "• Interval reminders with quiet-hours support\n"
+            "• Optional electrolyte-drink toggle (premium)\n"
+            "• 7-day history (free) or full history + 30-day trend (premium)\n"
+            "• Optional Apple Health sync — writes drinks as dietaryWater samples\n"
+            "• Clean light and dark mode, readable on small phones\n\n"
             "Privacy-first\n"
             "• No account, no sign-in\n"
             "• No cloud sync, no analytics SDKs\n"
-            "• Health integration is fully optional\n\n"
+            "• Works fully offline\n\n"
             "One-time purchase\n"
-            "• Free: quick start, built-in routines, one custom routine, 7-day history\n"
-            "• Lifetime unlock: unlimited custom routines, full history, advanced cues — forever, no subscription\n\n"
-            "WalkCue supports daily walking routines. It is not a medical device and does not diagnose, treat, or monitor any condition."
+            "• Free: logging, built-in presets, basic reminders, 7-day history\n"
+            "• Lifetime unlock: custom presets, electrolyte tracking, full history, advanced reminders — forever, no subscription\n\n"
+            "HydroLite helps you track water intake. Hydration targets are general defaults that you control. Not medical advice."
         ),
-        "keywords": "walk,walking,treadmill,interval,timer,pedometer,steps,cardio,reminder,walking coach",
-        "marketingUrl": "https://has-deploy.github.io/walkcue/",
-        "promotionalText": "Walk more, without the fuss. Interval cues, routines, and a simple daily goal. One-time purchase, no subscription.",
-        "supportUrl": "https://has-deploy.github.io/walkcue/support.html",
+        "keywords": "water,hydration,drink,tracker,reminder,intake,log,h2o,electrolyte,bottle",
+        "marketingUrl": "https://has-deploy.github.io/hydrolite/",
+        "promotionalText": "Tap once, see your progress, stay hydrated. One-time purchase, no subscription.",
+        "supportUrl": "https://has-deploy.github.io/hydrolite/support.html",
     }
 
     if en:
@@ -338,7 +337,7 @@ def cmd_metadata():
     print("Metadata saved.")
 
 
-def cmd_privacy(url="https://has-deploy.github.io/walkcue/privacy-policy.html"):
+def cmd_privacy(url="https://has-deploy.github.io/hydrolite/privacy-policy.html"):
     """Set the privacy policy URL on app info localization."""
     infos = request("GET", f"/v1/apps/{APP_ID}/appInfos", params={"limit": 10})
     # Use the editable one (state EDITABLE / PREPARE_FOR_SUBMISSION etc.)
@@ -358,7 +357,7 @@ def cmd_privacy(url="https://has-deploy.github.io/walkcue/privacy-policy.html"):
         request("POST", "/v1/appInfoLocalizations", {
             "data": {
                 "type": "appInfoLocalizations",
-                "attributes": {"locale": "en-US", "privacyPolicyUrl": url, "name": "WalkCue"},
+                "attributes": {"locale": "en-US", "privacyPolicyUrl": url, "name": "HydroLite"},
                 "relationships": {"appInfo": {"data": {"type": "appInfos", "id": info_id}}},
             }
         })

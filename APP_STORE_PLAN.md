@@ -1,5 +1,23 @@
 # App Store submission: full prompt + speed-run guide
 
+## ⚠️ Bundle-ID script gotcha — read first if duplicating scripts
+
+When copying an ASC automation script from a previous app, **never** hardcode
+the app name inside JSON bodies — parameterize via a `--app-name` flag and
+require it explicitly. If you miss this, a freshly registered bundle ID
+inherits the previous app's display name in the Apple Developer portal, and
+the ASC "New App" bundle-ID dropdown shows the wrong name. The fix:
+
+- Pass `--bundle-id`, `--app-name`, `--sku` as required flags on every run.
+- On rerun when the bundle already exists, PATCH its `name` attribute so any
+  stale name is overwritten (idempotent).
+- Never do `sed` copies of scripts between apps — the hardcoded strings will
+  silently leak through if they sit outside the variables you're replacing.
+
+See `scripts/asc_create_app.sh` for the reference implementation.
+
+---
+
 A generic, app-agnostic playbook. Drop this file into any iOS/iPadOS/macOS
 project and follow it. Two deliverables:
 
