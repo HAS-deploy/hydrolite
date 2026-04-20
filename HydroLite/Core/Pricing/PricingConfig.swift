@@ -18,7 +18,7 @@ enum PricingConfig {
 
     /// Free-tier caps.
     static let freeCustomPresetSlots = 0      // free users get the default set only
-    static let freeReminderSlots = 2
+    static let freeReminderSlots = 8
     /// History window in days for free users; premium sees all.
     static let freeHistoryWindow = 7
 }

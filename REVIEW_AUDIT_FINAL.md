@@ -1,78 +1,39 @@
-# HydroLite — FINAL pre-review audit
+# HydroLite — Adversarial App Store Review Audit (FINAL)
 
-Run date: 2026-04-17
-Prompt source: `~/Documents/app-store-review-prompt.md`
-State: v1.0 submitted, WAITING_FOR_REVIEW. Comprehensive reviewer notes +
-23-sec demo video attached preemptively.
+**Run date:** 2026-04-17
+**Reviewer persona:** Apple App Store Review
+**Target:** `/Users/tony/Developer/hydrolite` @ current HEAD
+**ASC app ID:** 6762470335
+**State:** WAITING_FOR_REVIEW; reviewer notes + demo video attached.
+**Verdict:** **2 HARD, 3 SIGNIFICANT.** Do NOT let this review without fixes.
 
-## Summary
+## HARD
 
-**No HARD rejections.** **No SIGNIFICANT rejections remain in the codebase.**
+### H1 — 2.5.1 / 5.1.1 — HealthKit used without entitlement
+Same pattern as WalkCue. `HealthKitManager.swift:10,26` calls HealthKit; no `.entitlements` file exists.
+- **Fix:** strip HealthKit from v1. Remove manager, Settings toggle, usage strings.
 
-## HARD rejections
+### H2 — 2.3.1 — Description advertises Apple Health write that never happens
+- `asc_driver.py:306` + `docs/index.html:26` + Settings toggle all promise Health sync.
+- `HealthKitManager.writeWater(...)` is defined but **never called** — `TodayView.logAmount:179-183` only saves to local store.
+- **Fix:** cleared by H1 fix (remove Health integration + remove the marketing claim from asc_driver.py description).
 
-None. HydroLite is:
-- Fully local-first (no network except StoreKit).
-- No account / sign-in.
-- One clean non-consumable IAP ($6.99 lifetime).
-- No third-party SDKs.
-- `ITSAppUsesNonExemptEncryption = false`.
+## SIGNIFICANT
 
-## SIGNIFICANT risks — all cleared
+### S1 — 2.3.1 — SleepWindow/WalkCue bleed in `asc_driver.py` IAP review note
+- `asc_driver.py:197` IAP reviewNote says "custom routines, full walk history, advanced cue packs" — WalkCue copy.
+- `asc_driver.py:216-217` create-IAP branch says "SleepWindow Lifetime Unlock" + "every calculator, nap planner."
+- **Fix:** rewrite strings to describe HydroLite's actual premium (custom presets, electrolyte, full history, advanced reminders). Patch live IAP reviewNote in ASC.
 
-| # | Finding | Status |
-|---|---|---|
-| 1 | 2.1 Info-needed rejection risk | ✅ 8-point notes + demo video preemptively supplied |
-| 2 | 2.3.3 Screenshots | ✅ 3 iPhone 6.9" + 3 iPad 12.9" with premium content in use |
-| 3 | 5.1.1 HealthKit purpose strings | ✅ both mention "optional" and stated purpose |
-| 4 | Privacy policy URL | ✅ https://has-deploy.github.io/hydrolite/privacy-policy.html |
-| 5 | App Privacy nutrition label | ✅ published as Data Not Collected |
+### S2 — 2.1 / 4.2 — Default config paywalls free-tier reminders instantly
+- Defaults: 120-min interval, 22-07 quiet hours → 15 h waking → 7 predicted reminders. Free tier cap is 2 (`PricingConfig:21`). `canEnableAnotherReminder(6)` → false. Free user can never toggle reminders on.
+- **Fix:** raise `freeReminderSlots` to 8 OR change gate semantics so one toggle is always allowed for free users.
 
-## MODERATE risks
+### S3 — 5.1.1 — HealthKit read permission requested, never used
+Cleared by H1 fix.
 
-### 1 — 4.2 Minimum Functionality
-Core is logging, aggregating, history, reminders, paywall. That's multiple
-distinct features with state persistence. Native StoreKit 2, local
-notifications with quiet hours, optional HealthKit write. Well above thin.
-
-### 2 — 1.4.1 Hydration-adjacent content
-Hydration targets are shown as user-editable general defaults with "Not
-medical advice" footers. No specific health claims. Reviewer notes
-explicitly disavow medical-device status.
-
-### 3 — Electrolyte toggle
-Premium-gated. The UI carefully avoids any nutrition-tracking appearance —
-it's literally a 2-state `DrinkType` enum, no calorie/sodium/etc fields.
-This is important: makes the app a pure volume logger, not a nutrition
-platform.
-
-## SOFT risks
-
-### 4 — Undo flow
-Explicit Undo button in the top-right of Today tab. Swipe-to-delete in
-History list. `LogsStore.undoLast()` has unit test coverage for the
-no-op empty case.
-
-### 5 — Date rollover
-Daily aggregation uses `Calendar.current.isDate(_, inSameDayAs:)` which
-respects the device's locale/timezone. Midnight rollover is correct.
-
-### 6 — Privacy manifest
-Only `UserDefaults CA92.1` declared. Matches code usage. HealthKit writes
-are behind a user toggle that triggers the auth prompt only on opt-in.
-
-## Test coverage
-- **20 unit tests** passing:
-  - `HydrationCalculatorTests` (6 cases): totalMl day-filter, progress clamp, remaining clamp, last-N-days, daily-totals ordering, volume conversions
-  - `PremiumGateTests` (5 cases): gating
-  - `LogsStoreTests` (5 cases): add, undo last, undo empty, today filter, clearAll
-  - `PresetsStoreTests` (4 cases): built-ins, persistence, upsert, IndexSet delete
-
-## Manual QA on simulator
-- iPhone 17 Pro Max: Today tab shows progress ring + all 4 presets, Undo button in top-right, History bar chart renders
-- iPhone SE 3rd gen: ring + all 4 presets + tab bar fit; nothing clipped
-- iPad Pro 13": layout scales cleanly
-- Paywall: auto-present via launch-arg works; Close returns to Today
-
-## Remaining action items
-None. HydroLite is ready for review.
+## Prioritized fix list
+1. **H1 + H2** — strip HealthKit; remove the marketing claim in description.
+2. **S1** — scrub SleepWindow/WalkCue strings from `asc_driver.py`; patch live IAP reviewNote.
+3. **S2** — fix free-reminder gate math or cap.
+4. Regenerate, re-archive, re-upload, cancel current submission, submit new build.

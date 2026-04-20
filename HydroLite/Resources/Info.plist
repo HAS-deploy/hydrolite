@@ -19,15 +19,15 @@
 	<key>CFBundleShortVersionString</key>
 	<string>1.0.0</string>
 	<key>CFBundleVersion</key>
-	<string>1</string>
+	<string>2</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
-	<key>NSHealthShareUsageDescription</key>
-	<string>HydroLite can read your water intake from the Health app. This is optional; the app works without it.</string>
-	<key>NSHealthUpdateUsageDescription</key>
-	<string>HydroLite can save logged drinks to the Health app as water entries. This is optional.</string>
+	<key>PostHogHost</key>
+	<string>https://us.i.posthog.com</string>
+	<key>PostHogKey</key>
+	<string>phc_zsZ6KoWfgoUyVnJEjKi5KC6CuS66xnyQgradTRmqc52s</string>
 	<key>UILaunchScreen</key>
 	<dict/>
 	<key>UISupportedInterfaceOrientations</key>

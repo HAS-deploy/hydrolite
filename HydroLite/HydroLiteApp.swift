@@ -9,6 +9,10 @@ struct HydroLiteApp: App {
     private let analytics: AnalyticsService = ConsoleAnalytics()
     private let reminders = ReminderManager()
 
+    init() {
+        PortfolioAnalytics.shared.start(appName: "hydrolite")
+    }
+
     var body: some Scene {
         WindowGroup {
             RootView()

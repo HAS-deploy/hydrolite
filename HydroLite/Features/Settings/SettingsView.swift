@@ -11,7 +11,6 @@ struct SettingsView: View {
     @State private var remindersEnabled = false
     @State private var intervalMinutes: Int = 120
     @State private var reminderAuthStatus: ReminderManager.AuthStatus = .notDetermined
-    private let healthKit = HealthKitManager()
 
     private let reminderPrefix = "hydrolite.reminder"
 
@@ -21,7 +20,6 @@ struct SettingsView: View {
             remindersSection
             goalSection
             unitsSection
-            healthSection
             dataSection
             aboutSection
             #if DEBUG
@@ -128,20 +126,6 @@ struct SettingsView: View {
                 ForEach(SettingsStore.Appearance.allCases) { a in Text(a.label).tag(a) }
             }
         } header: { Text("Display") }
-    }
-
-    @ViewBuilder
-    private var healthSection: some View {
-        if healthKit.isAvailable {
-            Section {
-                Toggle("Save drinks to Apple Health", isOn: $settings.healthKitOptedIn)
-                    .onChange(of: settings.healthKitOptedIn) { enabled in
-                        if enabled { Task { _ = await healthKit.requestWaterAuthorization() } }
-                    }
-            } header: { Text("Apple Health") } footer: {
-                Text("Optional. HydroLite works without Health access.")
-            }
-        }
     }
 
     private var dataSection: some View {
