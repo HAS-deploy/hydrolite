@@ -28,9 +28,15 @@ final class SettingsStore: ObservableObject {
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
-        self.units = VolumeUnit(rawValue: defaults.string(forKey: Keys.units) ?? "ounces") ?? .ounces
+        // First-launch default follows the device's measurement system so users
+        // in metric regions (everywhere outside US/Liberia/Myanmar) don't see
+        // ounces on open. Stored value, once present, always wins.
+        let defaultUnit: VolumeUnit = (Locale.current.measurementSystem == .us) ? .ounces : .milliliters
+        self.units = VolumeUnit(rawValue: defaults.string(forKey: Keys.units) ?? defaultUnit.rawValue) ?? defaultUnit
         let storedGoal = defaults.object(forKey: Keys.dailyGoalMl) as? Double
-        self.dailyGoalMl = storedGoal ?? (64.0 * VolumeUnit.ouncesToMl) // 64 oz default ≈ 1.9 L
+        // Default daily goal: 64 oz (≈1.9 L) for US, 2000 mL for metric regions.
+        let defaultGoalMl: Double = (Locale.current.measurementSystem == .us) ? (64.0 * VolumeUnit.ouncesToMl) : 2000.0
+        self.dailyGoalMl = storedGoal ?? defaultGoalMl
         self.appearance = Appearance(rawValue: defaults.string(forKey: Keys.appearance) ?? "system") ?? .system
         self.quietHoursStart = (defaults.object(forKey: Keys.quietHoursStart) as? Int) ?? 22
         self.quietHoursEnd = (defaults.object(forKey: Keys.quietHoursEnd) as? Int) ?? 7
