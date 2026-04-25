@@ -22,6 +22,7 @@ struct SettingsView: View {
             unitsSection
             dataSection
             aboutSection
+            moreFromUsSection
             #if DEBUG
             debugSection
             #endif
@@ -146,6 +147,31 @@ struct SettingsView: View {
             LabeledContent("Total logs", value: "\(logs.logs.count)")
         } header: { Text("About") } footer: {
             Text("HydroLite is a simple hydration logger. Not medical advice.")
+        }
+    }
+
+    private var moreFromUsSection: some View {
+        Section {
+            Link(destination: URL(string: "https://apps.apple.com/app/id6762468976")!) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("WalkCue").font(.body).foregroundStyle(.primary)
+                    Text("Step-by-step audio cues for your walks.").font(.caption).foregroundStyle(.secondary)
+                }
+            }
+            Link(destination: URL(string: "https://apps.apple.com/app/id6762492636")!) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("RackTimer").font(.body).foregroundStyle(.primary)
+                    Text("Smart rest timer for the gym.").font(.caption).foregroundStyle(.secondary)
+                }
+            }
+            Link(destination: URL(string: "https://apps.apple.com/app/id6762465676")!) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("SleepWindow").font(.body).foregroundStyle(.primary)
+                    Text("Personalized bed/wake windows.").font(.caption).foregroundStyle(.secondary)
+                }
+            }
+        } header: { Text("More from us") } footer: {
+            Text("Other useful apps from the same team. Tap to open in the App Store.")
         }
     }
 

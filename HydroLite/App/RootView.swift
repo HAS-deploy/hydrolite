@@ -24,18 +24,21 @@ struct RootView: View {
         TabView(selection: $selection) {
             NavigationStack {
                 TodayView(onGatedTap: { paywallTrigger = $0 })
+                    .trackScreen("today")
             }
             .tabItem { Label("Today", systemImage: "drop.fill") }
             .tag(Tab.today)
 
             NavigationStack {
                 HistoryView(onGatedTap: { paywallTrigger = $0 })
+                    .trackScreen("history")
             }
             .tabItem { Label("History", systemImage: "chart.bar") }
             .tag(Tab.history)
 
             NavigationStack {
                 SettingsView()
+                    .trackScreen("settings")
             }
             .tabItem { Label("Settings", systemImage: "gearshape") }
             .tag(Tab.settings)

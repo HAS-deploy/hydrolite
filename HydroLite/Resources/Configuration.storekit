@@ -19,6 +19,35 @@
     }
   ],
   "settings" : { "_applicationInternalID" : "HydroLite", "_failTransactionsEnabled" : false, "_locale" : "en_US", "_storefront" : "USA" },
-  "subscriptionGroups" : [],
+  "subscriptionGroups" : [
+    {
+      "id" : "hydrolite_premium",
+      "localizations" : [],
+      "name" : "HydroLite Premium",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [],
+          "codeOffers" : [],
+          "displayPrice" : "1.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "hydrolite.monthly",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Auto-renewing monthly subscription. Unlock custom presets, electrolyte tracking, full history, and advanced reminders.",
+              "displayName" : "HydroLite Premium (Monthly)",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "com.hydrolite.app.monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "HydroLite Premium Monthly",
+          "subscriptionGroupID" : "hydrolite_premium",
+          "type" : "RecurringSubscription"
+        }
+      ]
+    }
+  ],
   "version" : { "major" : 3, "minor" : 0 }
 }

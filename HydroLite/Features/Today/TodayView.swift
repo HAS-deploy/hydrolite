@@ -109,7 +109,7 @@ struct TodayView: View {
         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
             ForEach(displayPresets) { preset in
                 Button {
-                    logAmount(preset.amountMl, type: selectedType)
+                    logAmount(preset.amountMl, type: selectedType, source: preset.isBuiltIn ? "preset" : "custom")
                 } label: {
                     VStack(spacing: 4) {
                         Image(systemName: preset.drinkType.symbol)
@@ -176,10 +176,28 @@ struct TodayView: View {
             .foregroundStyle(Theme.subtle)
     }
 
-    private func logAmount(_ ml: Double, type: DrinkType) {
+    private func logAmount(_ ml: Double, type: DrinkType, source: String = "preset") {
+        let previousTotal = logs.totalMl()
         let log = HydrationLog(amountMl: ml, drinkType: purchases.isPremium ? type : .water)
         logs.add(log)
         analytics.track(.waterLogged, properties: ["ml": String(Int(ml)), "type": log.drinkType.rawValue])
+
+        let amountOz = Int((ml / VolumeUnit.ouncesToMl).rounded())
+        PortfolioAnalytics.shared.track("hydration.logged", [
+            "amount_oz": amountOz,
+            "source": source,
+        ])
+
+        // Fire daily_goal_hit the moment we cross the goal line.
+        let newTotal = logs.totalMl()
+        if previousTotal < goal && newTotal >= goal {
+            let goalOz = Int((goal / VolumeUnit.ouncesToMl).rounded())
+            let hour = Calendar.current.component(.hour, from: Date())
+            PortfolioAnalytics.shared.track("daily_goal_hit", [
+                "goal_oz": goalOz,
+                "at_hour": hour,
+            ])
+        }
     }
 }
 
