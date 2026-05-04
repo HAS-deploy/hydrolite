@@ -11,6 +11,8 @@ struct TodayView: View {
 
     @State private var lastUndoAt: Date? = nil
     @State private var selectedType: DrinkType = .water
+    @State private var logTrigger = 0
+    @State private var goalReachedTrigger = 0
 
     private var gate: PremiumGate { PremiumGate(isPremium: purchases.isPremium) }
 
@@ -40,6 +42,8 @@ struct TodayView: View {
         }
         .navigationTitle("Today")
         .navigationBarTitleDisplayMode(.large)
+        .hapticImpact(.light, trigger: logTrigger)
+        .hapticSuccess(trigger: goalReachedTrigger)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
@@ -180,6 +184,7 @@ struct TodayView: View {
         let previousTotal = logs.totalMl()
         let log = HydrationLog(amountMl: ml, drinkType: purchases.isPremium ? type : .water)
         logs.add(log)
+        logTrigger &+= 1
         analytics.track(.waterLogged, properties: ["ml": String(Int(ml)), "type": log.drinkType.rawValue])
 
         let amountOz = Int((ml / VolumeUnit.ouncesToMl).rounded())
@@ -191,6 +196,7 @@ struct TodayView: View {
         // Fire daily_goal_hit the moment we cross the goal line.
         let newTotal = logs.totalMl()
         if previousTotal < goal && newTotal >= goal {
+            goalReachedTrigger &+= 1
             let goalOz = Int((goal / VolumeUnit.ouncesToMl).rounded())
             let hour = Calendar.current.component(.hour, from: Date())
             PortfolioAnalytics.shared.track("daily_goal_hit", [
