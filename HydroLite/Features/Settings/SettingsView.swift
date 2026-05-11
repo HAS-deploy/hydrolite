@@ -196,7 +196,7 @@ struct SettingsView: View {
         } else if reminderAuthStatus == .denied {
             remindersEnabled = false; return
         }
-        let gate = PremiumGate(isPremium: purchases.isPremium)
+        let gate = PremiumGate(isEntitled: purchases.isEntitled)
         // Free users: cap at max PricingConfig.freeReminderSlots reminders.
         // If interval would produce more slots than allowed, bump the user to paywall.
         let waking = 24 - (settings.quietHoursEnd >= settings.quietHoursStart ? (settings.quietHoursEnd - settings.quietHoursStart) : (24 - settings.quietHoursStart + settings.quietHoursEnd))

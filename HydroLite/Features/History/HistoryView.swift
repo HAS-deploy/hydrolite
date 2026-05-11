@@ -8,7 +8,7 @@ struct HistoryView: View {
     let onGatedTap: (PremiumFeature) -> Void
 
     private var windowDays: Int {
-        purchases.isPremium ? 30 : PricingConfig.freeHistoryWindow
+        purchases.isEntitled ? 30 : PricingConfig.freeHistoryWindow
     }
 
     private var dailyTotals: [(date: Date, totalMl: Double)] {
@@ -38,7 +38,7 @@ struct HistoryView: View {
                 }
             }
 
-            if !purchases.isPremium {
+            if !purchases.isEntitled {
                 Section {
                     UpsellCard(
                         title: "See your full history",

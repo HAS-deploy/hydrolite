@@ -45,6 +45,32 @@
           "referenceName" : "HydroLite Premium Monthly",
           "subscriptionGroupID" : "hydrolite_premium",
           "type" : "RecurringSubscription"
+        },
+        {
+          "adHocOffers" : [],
+          "codeOffers" : [],
+          "displayPrice" : "14.99",
+          "familyShareable" : false,
+          "groupNumber" : 2,
+          "internalID" : "hydrolite.yearly",
+          "introductoryOffer" : {
+            "internalID" : "hydrolite.yearly.trial",
+            "paymentMode" : "free",
+            "subscriptionPeriod" : "P1W",
+            "numberOfPeriods" : 1
+          },
+          "localizations" : [
+            {
+              "description" : "Auto-renewing yearly subscription. 7-day free trial, then renews yearly. Unlock custom presets, electrolyte tracking, full history, and advanced reminders.",
+              "displayName" : "HydroLite Premium (Yearly)",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "com.hydrolite.app.yearly",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "HydroLite Premium Yearly",
+          "subscriptionGroupID" : "hydrolite_premium",
+          "type" : "RecurringSubscription"
         }
       ]
     }

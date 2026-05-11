@@ -21,10 +21,23 @@ enum PremiumFeature: String, Identifiable, Hashable {
 }
 
 struct PremiumGate {
-    let isPremium: Bool
+    /// Effective entitlement: paid premium OR inside the install-time free
+    /// trial. Call sites should pass `purchases.isEntitled`, not raw
+    /// `isPremium`, so install-trial users get the full Premium experience.
+    let isEntitled: Bool
+
+    init(isEntitled: Bool) {
+        self.isEntitled = isEntitled
+    }
+
+    /// Back-compat shim for older call sites that still pass `isPremium:`.
+    /// Treats premium and entitled identically.
+    init(isPremium: Bool) {
+        self.isEntitled = isPremium
+    }
 
     func isAllowed(_ feature: PremiumFeature) -> Bool {
-        if isPremium { return true }
+        if isEntitled { return true }
         switch feature {
         case .quickLog:
             return true
@@ -34,12 +47,12 @@ struct PremiumGate {
     }
 
     func canSaveAnotherCustomPreset(currentCount: Int) -> Bool {
-        if isPremium { return true }
+        if isEntitled { return true }
         return currentCount < PricingConfig.freeCustomPresetSlots
     }
 
     func canEnableAnotherReminder(currentCount: Int) -> Bool {
-        if isPremium { return true }
+        if isEntitled { return true }
         return currentCount < PricingConfig.freeReminderSlots
     }
 }

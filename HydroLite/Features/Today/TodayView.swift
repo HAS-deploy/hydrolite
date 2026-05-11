@@ -14,7 +14,7 @@ struct TodayView: View {
     @State private var logTrigger = 0
     @State private var goalReachedTrigger = 0
 
-    private var gate: PremiumGate { PremiumGate(isPremium: purchases.isPremium) }
+    private var gate: PremiumGate { PremiumGate(isEntitled: purchases.isEntitled) }
 
     private var total: Double { logs.totalMl() }
     private var goal: Double { settings.dailyGoalMl }
@@ -23,7 +23,7 @@ struct TodayView: View {
 
     private var displayPresets: [DrinkPreset] {
         var result = BuiltInPresets.set(for: settings.units)
-        if purchases.isPremium { result.append(contentsOf: presets.customPresets) }
+        if purchases.isEntitled { result.append(contentsOf: presets.customPresets) }
         return result
     }
 
@@ -34,7 +34,7 @@ struct TodayView: View {
                 drinkTypeToggle
                 presetGrid
                 recentCard
-                if !purchases.isPremium { upsellCard }
+                if !purchases.isEntitled { upsellCard }
                 disclaimer
             }
             .padding()
@@ -182,7 +182,7 @@ struct TodayView: View {
 
     private func logAmount(_ ml: Double, type: DrinkType, source: String = "preset") {
         let previousTotal = logs.totalMl()
-        let log = HydrationLog(amountMl: ml, drinkType: purchases.isPremium ? type : .water)
+        let log = HydrationLog(amountMl: ml, drinkType: purchases.isEntitled ? type : .water)
         logs.add(log)
         logTrigger &+= 1
         analytics.track(.waterLogged, properties: ["ml": String(Int(ml)), "type": log.drinkType.rawValue])

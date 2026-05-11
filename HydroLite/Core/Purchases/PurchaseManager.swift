@@ -4,8 +4,13 @@ import StoreKit
 @MainActor
 final class PurchaseManager: ObservableObject {
     @Published private(set) var isPremium: Bool = false
+    /// True while the install-time free-trial window (PricingConfig.annualTrialDays)
+    /// is still open. Purely time-based off `firstLaunchAt`; independent of
+    /// `isPremium` and unaffected by `setPremium(false)`.
+    @Published private(set) var installTrialActive: Bool = false
     @Published private(set) var lifetimeProduct: Product?
     @Published private(set) var monthlyProduct: Product?
+    @Published private(set) var yearlyProduct: Product?
     @Published private(set) var isPurchasing: Bool = false
     @Published var lastError: String?
     /// Distinguish user-cancel / pending / errors for the analytics layer.
@@ -13,24 +18,70 @@ final class PurchaseManager: ObservableObject {
 
     private var updatesTask: Task<Void, Never>?
     private let premiumKey = "hydrolite.isPremium"
+    private let firstLaunchKey = "hydrolite.firstLaunchAt"
+    private let defaults: UserDefaults
+    private let clock: () -> Date
 
-    init() {
-        var initial = UserDefaults.standard.bool(forKey: premiumKey)
+    /// Effective entitlement: paid premium OR inside the install-time trial.
+    var isEntitled: Bool { isPremium || installTrialActive }
+
+    init(defaults: UserDefaults = .standard, clock: @escaping () -> Date = Date.init) {
+        self.defaults = defaults
+        self.clock = clock
+        var initial = defaults.bool(forKey: premiumKey)
         #if DEBUG
         if ProcessInfo.processInfo.environment["HYDROLITE_FORCE_PREMIUM"] == "1"
-            || UserDefaults.standard.bool(forKey: "HYDROLITE_FORCE_PREMIUM") {
+            || defaults.bool(forKey: "HYDROLITE_FORCE_PREMIUM") {
             initial = true
         }
         #endif
         self.isPremium = initial
+
+        // Anchor the install-trial clock on first ever launch.
+        let now = clock()
+        if defaults.object(forKey: firstLaunchKey) as? Date == nil {
+            defaults.set(now, forKey: firstLaunchKey)
+        }
+        self.installTrialActive = Self.computeTrialActive(
+            firstLaunch: defaults.object(forKey: firstLaunchKey) as? Date,
+            now: now
+        )
     }
 
     deinit { updatesTask?.cancel() }
 
     func start() async {
+        refreshInstallTrial()
         await loadProducts()
         await refreshEntitlements()
         observeTransactionUpdates()
+    }
+
+    /// Recompute `installTrialActive` against the current clock. Safe to call
+    /// any time; does not mutate `firstLaunchAt` once it's been anchored.
+    func refreshInstallTrial() {
+        let stored = defaults.object(forKey: firstLaunchKey) as? Date
+        let anchored: Date
+        if let stored {
+            anchored = stored
+        } else {
+            anchored = clock()
+            defaults.set(anchored, forKey: firstLaunchKey)
+        }
+        let active = Self.computeTrialActive(firstLaunch: anchored, now: clock())
+        if active != self.installTrialActive {
+            self.installTrialActive = active
+        }
+    }
+
+    /// Pure trial-window math, factored out so tests can drive it with a fake
+    /// clock without touching UserDefaults timing.
+    nonisolated static func computeTrialActive(firstLaunch: Date?, now: Date) -> Bool {
+        guard let firstLaunch else { return true }
+        let trialEnd = firstLaunch.addingTimeInterval(
+            TimeInterval(PricingConfig.annualTrialDays) * 24 * 60 * 60
+        )
+        return now < trialEnd
     }
 
     var lifetimeDisplayPrice: String {
@@ -41,11 +92,16 @@ final class PurchaseManager: ObservableObject {
         monthlyProduct?.displayPrice ?? PricingConfig.fallbackMonthlyDisplayPrice
     }
 
+    var yearlyDisplayPrice: String {
+        yearlyProduct?.displayPrice ?? PricingConfig.fallbackAnnualDisplayPrice
+    }
+
     func loadProducts() async {
         do {
             let products = try await Product.products(for: PricingConfig.allProductIDs)
             self.lifetimeProduct = products.first { $0.id == PricingConfig.lifetimeProductID }
             self.monthlyProduct  = products.first { $0.id == PricingConfig.monthlyProductID }
+            self.yearlyProduct   = products.first { $0.id == PricingConfig.annualProductID }
         } catch {
             self.lastError = "Couldn't load the store. Check your connection and try again."
         }
@@ -61,6 +117,14 @@ final class PurchaseManager: ObservableObject {
 
     func purchaseMonthly() async {
         guard let product = monthlyProduct else {
+            self.lastError = "Product unavailable. Try again in a moment."
+            return
+        }
+        await purchase(product)
+    }
+
+    func purchaseYearly() async {
+        guard let product = yearlyProduct else {
             self.lastError = "Product unavailable. Try again in a moment."
             return
         }
@@ -114,7 +178,7 @@ final class PurchaseManager: ObservableObject {
     private func refreshEntitlements() async {
         #if DEBUG
         if ProcessInfo.processInfo.environment["HYDROLITE_FORCE_PREMIUM"] == "1"
-            || UserDefaults.standard.bool(forKey: "HYDROLITE_FORCE_PREMIUM") {
+            || defaults.bool(forKey: "HYDROLITE_FORCE_PREMIUM") {
             setPremium(true); return
         }
         #endif
@@ -154,7 +218,10 @@ final class PurchaseManager: ObservableObject {
 
     private func setPremium(_ value: Bool) {
         self.isPremium = value
-        UserDefaults.standard.set(value, forKey: premiumKey)
+        defaults.set(value, forKey: premiumKey)
+        // NOTE: do NOT touch `firstLaunchAt` or `installTrialActive` here.
+        // Install trial is purely time-based; toggling premium off (refund,
+        // revocation, debug toggle) must not extend or reset the trial.
     }
 
     private func checkVerified<T>(_ result: VerificationResult<T>) throws -> T {
