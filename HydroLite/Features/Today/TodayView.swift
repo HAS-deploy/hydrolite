@@ -168,8 +168,8 @@ struct TodayView: View {
     private var upsellCard: some View {
         UpsellCard(
             title: "Unlock HydroLite",
-            message: "Custom presets, electrolyte tracking, full history, and advanced reminders.",
-            feature: .customPresets,
+            message: "Electrolyte tracking, full history, and advanced reminders.",
+            feature: .electrolyteTracking,
             onTap: onGatedTap
         )
     }

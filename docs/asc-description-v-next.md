@@ -32,7 +32,7 @@ Privacy-first
 
 Pricing
 • Free forever: logging, built-in presets, basic reminders, 3-day history
-• Premium Monthly — $1.99/month (auto-renewing): custom presets, electrolyte tracking, full history, advanced reminders
+• Premium Monthly — $1.99/month (auto-renewing): electrolyte tracking, full history, advanced reminders
 • Premium Yearly — $14.99/year (auto-renewing) with a 7-day free trial: the same premium features, billed annually
 • Premium Lifetime — $6.99 (one-time): the same premium features, paid once, kept forever
 

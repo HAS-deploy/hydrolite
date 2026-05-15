@@ -84,6 +84,21 @@ final class PurchaseManager: ObservableObject {
         return now < trialEnd
     }
 
+    /// Whole days remaining in the install-time trial window (rounded up, min 0).
+    /// Returns 0 once the trial has elapsed. Read-only convenience for UI copy
+    /// in paywall / Settings disclosure of the install-trial state.
+    var installTrialDaysRemaining: Int {
+        guard let firstLaunch = defaults.object(forKey: firstLaunchKey) as? Date else {
+            return PricingConfig.annualTrialDays
+        }
+        let trialEnd = firstLaunch.addingTimeInterval(
+            TimeInterval(PricingConfig.annualTrialDays) * 24 * 60 * 60
+        )
+        let remaining = trialEnd.timeIntervalSince(clock())
+        guard remaining > 0 else { return 0 }
+        return max(0, Int(ceil(remaining / 86400)))
+    }
+
     var lifetimeDisplayPrice: String {
         lifetimeProduct?.displayPrice ?? PricingConfig.fallbackLifetimeDisplayPrice
     }

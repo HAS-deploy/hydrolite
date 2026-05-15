@@ -35,7 +35,6 @@ enum PricingConfig {
     static let paywallSubtitle = "Pick yearly with a 7-day free trial, monthly, or one-time lifetime unlock."
 
     static let paywallBenefits: [String] = [
-        "Custom drink presets",
         "Electrolyte tracking",
         "Full history and 30-day trends",
         "Advanced reminders with quiet hours",

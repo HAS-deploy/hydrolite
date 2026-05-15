@@ -13,6 +13,7 @@ struct PaywallView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
                     header
+                    if purchases.installTrialActive { installTrialBanner }
                     benefits
                     yearlyCard
                     monthlyCard
@@ -58,6 +59,31 @@ struct PaywallView: View {
             Text("Unlock everything").font(.largeTitle.bold())
             Text(PricingConfig.paywallSubtitle).font(.subheadline).foregroundStyle(.secondary)
         }
+    }
+
+    // Banner disclosed when the user is inside the install-time free-Premium
+    // window. Surfaces what is otherwise a silent grant so a user buying the
+    // yearly intro offer understands the two trials are separate.
+    private var installTrialBanner: some View {
+        let days = purchases.installTrialDaysRemaining
+        return HStack(alignment: .top, spacing: 10) {
+            Image(systemName: "gift.fill")
+                .foregroundStyle(Theme.accent)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Your free Premium preview is active")
+                    .font(.subheadline.weight(.semibold))
+                Text("\(days) day\(days == 1 ? "" : "s") remaining — no card required. Subscribe before it ends to keep Premium.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous)
+                .fill(Theme.accent.opacity(0.12))
+        )
     }
 
     private var benefits: some View {

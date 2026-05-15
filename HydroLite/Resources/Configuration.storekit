@@ -8,7 +8,7 @@
       "internalID" : "hydrolite.lifetime",
       "localizations" : [
         {
-          "description" : "One-time purchase. Unlock custom presets, electrolyte tracking, full history, and advanced reminders.",
+          "description" : "One-time purchase. Unlock electrolyte tracking, full history, and advanced reminders.",
           "displayName" : "HydroLite Lifetime Unlock",
           "locale" : "en_US"
         }
@@ -35,7 +35,7 @@
           "introductoryOffer" : null,
           "localizations" : [
             {
-              "description" : "Auto-renewing monthly subscription. Unlock custom presets, electrolyte tracking, full history, and advanced reminders.",
+              "description" : "Auto-renewing monthly subscription. Unlock electrolyte tracking, full history, and advanced reminders.",
               "displayName" : "HydroLite Premium (Monthly)",
               "locale" : "en_US"
             }
@@ -61,7 +61,7 @@
           },
           "localizations" : [
             {
-              "description" : "Auto-renewing yearly subscription. 7-day free trial, then renews yearly. Unlock custom presets, electrolyte tracking, full history, and advanced reminders.",
+              "description" : "Auto-renewing yearly subscription. 7-day free trial, then renews yearly. Unlock electrolyte tracking, full history, and advanced reminders.",
               "displayName" : "HydroLite Premium (Yearly)",
               "locale" : "en_US"
             }

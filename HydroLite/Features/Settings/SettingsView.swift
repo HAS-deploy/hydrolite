@@ -1,4 +1,5 @@
 import SwiftUI
+import StoreKit
 
 struct SettingsView: View {
     @EnvironmentObject var settings: SettingsStore
@@ -6,13 +7,25 @@ struct SettingsView: View {
     @EnvironmentObject var logs: LogsStore
     @Environment(\.analytics) private var analytics
     @Environment(\.reminders) private var reminders
+    @Environment(\.openURL) private var openURL
 
     @State private var showPaywall = false
     @State private var remindersEnabled = false
     @State private var intervalMinutes: Int = 120
     @State private var reminderAuthStatus: ReminderManager.AuthStatus = .notDetermined
+    @AppStorage("portfolio.analytics.opted_out") private var analyticsOptedOut: Bool = false
 
     private let reminderPrefix = "hydrolite.reminder"
+
+    private var analyticsEnabled: Binding<Bool> {
+        Binding(
+            get: { !analyticsOptedOut },
+            set: { newValue in
+                if newValue { PortfolioAnalytics.shared.optIn() }
+                else { PortfolioAnalytics.shared.optOut() }
+            }
+        )
+    }
 
     var body: some View {
         Form {
@@ -43,7 +56,34 @@ struct SettingsView: View {
         Section {
             if purchases.isPremium {
                 Label("Premium unlocked", systemImage: "checkmark.seal.fill").foregroundStyle(Theme.accent)
+                Button("Manage subscription") {
+                    Task {
+                        let scenes = UIApplication.shared.connectedScenes
+                        let scene = (scenes.first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene)
+                            ?? (scenes.first as? UIWindowScene)
+                        if let scene {
+                            try? await AppStore.showManageSubscriptions(in: scene)
+                        } else if let url = URL(string: "https://apps.apple.com/account/subscriptions") {
+                            openURL(url)
+                        }
+                    }
+                }
+                Button("Restore purchases") {
+                    analytics.track(.restorePurchasesTapped)
+                    Task { await purchases.restorePurchases() }
+                }
             } else {
+                if purchases.installTrialActive {
+                    HStack(alignment: .top, spacing: 10) {
+                        Image(systemName: "gift.fill").foregroundStyle(Theme.accent)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Free Premium preview").font(.subheadline.weight(.semibold))
+                            Text("\(purchases.installTrialDaysRemaining) day\(purchases.installTrialDaysRemaining == 1 ? "" : "s") remaining. Subscribe before it ends to keep Premium.")
+                                .font(.caption).foregroundStyle(.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                    }
+                }
                 Button { showPaywall = true } label: {
                     HStack {
                         VStack(alignment: .leading) {
@@ -131,11 +171,12 @@ struct SettingsView: View {
 
     private var dataSection: some View {
         Section {
+            Toggle("Anonymous usage analytics", isOn: analyticsEnabled)
             Button(role: .destructive) { logs.clearAll() } label: {
                 Label("Clear all logs", systemImage: "trash")
             }
         } header: { Text("Data") } footer: {
-            Text("Clears logs on this device. Cannot be undone.")
+            Text("Anonymous, aggregate product analytics only — never your hydration data. Clearing logs removes them from this device and cannot be undone.")
         }
     }
 
