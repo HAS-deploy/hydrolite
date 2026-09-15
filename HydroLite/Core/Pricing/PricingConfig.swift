@@ -4,13 +4,15 @@ import Foundation
 /// 3.1.2(a) disclosure block. The paywall, `Configuration.storekit`, and
 /// the ASC-side products must all agree with these constants.
 ///
-/// Trial-determination model (portfolio-wide pattern):
-///   - Annual product carries a StoreKit `introductoryOffer` of paymentMode
-///     `free` for `P1W` (7 days). HydroLite uses 1 week because hydration is
-///     a daily-use habit that forms within a week.
+/// Trial-determination model:
+///   - Install-time Premium grant is **local** (14 days via `annualTrialDays`).
+///     `PurchaseManager.computeTrialActive` / `installTrialDaysRemaining` read
+///     that constant. This is not an App Store Connect introductory offer.
+///   - Annual product display copy is renewal-only (`annualTrialDescription`);
+///     do not advertise an ASC intro length here.
 ///   - Monthly product carries NO intro offer.
-///   - Forfeiture sentence is rendered inline next to the trial AND in the
-///     disclosure block per the canonical 3.1.2 pattern.
+///   - Forfeiture sentence is rendered inline next to the yearly offer AND in
+///     the disclosure block per the canonical 3.1.2 pattern.
 enum PricingConfig {
     // Product IDs (legacy names kept for source-compat with existing call
     // sites; mirror `ProductIDs` enum for the canonical lookup).
@@ -32,7 +34,7 @@ enum PricingConfig {
     static let allProductIDs: [String] = ProductIDs.all
 
     static let paywallTitle = "Unlock HydroLite"
-    static let paywallSubtitle = "Pick yearly with a 7-day free trial, monthly, or one-time lifetime unlock."
+    static let paywallSubtitle = "Pick yearly, monthly, or one-time lifetime unlock."
 
     static let paywallBenefits: [String] = [
         "Electrolyte tracking",
@@ -41,12 +43,11 @@ enum PricingConfig {
         "Saved goals and favorites"
     ]
 
-    /// Trial-determination: 7-day free trial introductory offer on annual.
-    /// Mirrors `Configuration.storekit` and the ASC-side
-    /// `subscriptionIntroductoryOffers` records — the constant + the
-    /// StoreKit file + the paywall copy + the ASC product must agree exactly.
-    static let annualTrialDays: Int = 7
-    static let annualTrialDescription: String = "7-day free trial, then $14.99/year"
+    /// Local install-time Premium grant length (14 days). This is what
+    /// `PurchaseManager.computeTrialActive` / `installTrialDaysRemaining`
+    /// read. Not an ASC introductory offer.
+    static let annualTrialDays: Int = 14
+    static let annualTrialDescription: String = "$14.99/year, auto-renews"
 
     /// 3.1.2(a) disclosures rendered verbatim by the paywall.
     static let disclosurePaymentCharged =
