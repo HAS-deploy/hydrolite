@@ -26,6 +26,10 @@ final class InstallTrialTests: XCTestCase {
 
     // MARK: - Pure trial-window math
 
+    func testInstallTrialSourceOfTruthIsFourteenDays() {
+        XCTAssertEqual(PricingConfig.annualTrialDays, 14)
+    }
+
     func testFreshInstallTrialActive() {
         let now = Date()
         XCTAssertTrue(PurchaseManager.computeTrialActive(firstLaunch: now, now: now))

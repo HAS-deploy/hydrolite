@@ -1,5 +1,9 @@
 # HydroLite — Ship Notes (Portfolio Audit 2026-05-15)
 
+## Install-trial SoT (code only, 2026-09-15)
+
+Master install-trial source of truth is now **14 days**. `PricingConfig.annualTrialDays = 14` is what `PurchaseManager.computeTrialActive` / `installTrialDaysRemaining` read for the local install-time Premium grant. Yearly paywall copy is renewal-only (`$14.99/year, auto-renews`); this is not an ASC intro and this note is code-only — no App Store Connect submit.
+
 Source audit: `/Users/tony/Documents/portfolio-audit/01-hydrolite.md`
 Verdict baseline: 2 HARD · 4 SIGNIFICANT · 3 POLISH
 

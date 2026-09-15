@@ -61,9 +61,9 @@ struct PaywallView: View {
         }
     }
 
-    // Banner disclosed when the user is inside the install-time free-Premium
-    // window. Surfaces what is otherwise a silent grant so a user buying the
-    // yearly intro offer understands the two trials are separate.
+    // Banner disclosed when the user is inside the local install-time
+    // Premium grant (`PricingConfig.annualTrialDays`). Remaining days come
+    // from `installTrialDaysRemaining` so the copy stays aligned with SoT.
     private var installTrialBanner: some View {
         let days = purchases.installTrialDaysRemaining
         return HStack(alignment: .top, spacing: 10) {
