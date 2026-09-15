@@ -1,9 +1,10 @@
 import XCTest
 @testable import HydroLite
 
-/// Verifies the install-time 7-day Premium trial behavior:
+/// Verifies the install-time Premium trial behavior:
 ///   * Fresh install → full Premium for `PricingConfig.annualTrialDays` days.
-///   * Day 7+ → drops back to free tier (data still preserved on disk).
+///   * After `annualTrialDays` elapse → drops back to free tier (data still
+///     preserved on disk).
 ///   * Toggling `setPremium(false)` (refund/revoke) does NOT wipe the
 ///     install-trial anchor — the trial is purely time-based.
 final class InstallTrialTests: XCTestCase {
@@ -30,22 +31,24 @@ final class InstallTrialTests: XCTestCase {
         XCTAssertTrue(PurchaseManager.computeTrialActive(firstLaunch: now, now: now))
     }
 
-    func testTrialActiveOnDaySix() {
+    func testTrialActiveOnLastFullDay() {
         let start = Date()
-        let day6 = start.addingTimeInterval(6 * 24 * 60 * 60)
+        let lastFullDay = start.addingTimeInterval(
+            TimeInterval(PricingConfig.annualTrialDays - 1) * 24 * 60 * 60
+        )
         XCTAssertTrue(
-            PurchaseManager.computeTrialActive(firstLaunch: start, now: day6),
-            "Trial must remain active through the end of day 6 (i.e. < 7d)."
+            PurchaseManager.computeTrialActive(firstLaunch: start, now: lastFullDay),
+            "Trial must remain active through day annualTrialDays - 1."
         )
     }
 
-    func testTrialInactiveAfterSevenDays() {
+    func testTrialInactiveAfterWindowElapses() {
         let start = Date()
-        let day7Plus = start.addingTimeInterval(
+        let justPastWindow = start.addingTimeInterval(
             TimeInterval(PricingConfig.annualTrialDays) * 24 * 60 * 60 + 1
         )
         XCTAssertFalse(
-            PurchaseManager.computeTrialActive(firstLaunch: start, now: day7Plus),
+            PurchaseManager.computeTrialActive(firstLaunch: start, now: justPastWindow),
             "Trial must have ended once `annualTrialDays` have fully elapsed."
         )
     }
@@ -91,11 +94,13 @@ final class InstallTrialTests: XCTestCase {
         let start = Date()
         // First launch anchors firstLaunchAt = start.
         _ = PurchaseManager(defaults: defaults, clock: { start })
-        // Subsequent launch happens 8 days later.
-        let later = start.addingTimeInterval(8 * 24 * 60 * 60)
+        // Subsequent launch happens after the trial window plus one day.
+        let later = start.addingTimeInterval(
+            TimeInterval(PricingConfig.annualTrialDays + 1) * 24 * 60 * 60
+        )
         let pm = PurchaseManager(defaults: defaults, clock: { later })
         XCTAssertFalse(pm.installTrialActive,
-                       "Install trial should be expired on day 8.")
+                       "Install trial should be expired on day annualTrialDays + 1.")
         XCTAssertFalse(pm.isEntitled,
                        "With no purchase + expired trial, user is back to free tier.")
     }
@@ -106,7 +111,9 @@ final class InstallTrialTests: XCTestCase {
         var fakeNow = start
         let pm = PurchaseManager(defaults: defaults, clock: { fakeNow })
         XCTAssertTrue(pm.installTrialActive)
-        fakeNow = start.addingTimeInterval(10 * 24 * 60 * 60)
+        fakeNow = start.addingTimeInterval(
+            TimeInterval(PricingConfig.annualTrialDays + 1) * 24 * 60 * 60
+        )
         pm.refreshInstallTrial()
         XCTAssertFalse(pm.installTrialActive)
     }
